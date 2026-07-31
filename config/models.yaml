@@ -1,0 +1,51 @@
+# Model registry. Add a model = add one block here. Nothing else changes.
+#
+#   openrouter.slug          -> what we MEASURE ourselves (perf + evals)
+#   artificialAnalysis.slug  -> what we PULL from the AA API (published scores)
+#
+# Either block may be omitted. A model with only `openrouter` shows in the
+# Measured tab and is greyed out in the Artificial Analysis tab, and vice versa.
+
+defaults:
+  trials: 5 # perf samples per model; median is reported
+  temperature: 0
+  maxTokens: 512
+
+models:
+  - key: gpt-4.1
+    label: GPT-4.1
+    creator: OpenAI
+    openWeights: false
+    contextWindow: 1047576
+    enabled: true
+    openrouter: { slug: openai/gpt-4.1 }
+    artificialAnalysis: { slug: gpt-4-1 }
+
+  - key: gpt-oss-120b
+    label: gpt-oss 120B
+    creator: OpenAI
+    openWeights: true
+    contextWindow: 131072
+    enabled: true
+    openrouter: { slug: openai/gpt-oss-120b }
+    artificialAnalysis: { slug: gpt-oss-120b }
+
+  - key: gemma-4-31b
+    label: Gemma 4 31B
+    creator: Google
+    openWeights: true
+    contextWindow: 131072
+    enabled: true
+    openrouter: { slug: google/gemma-4-31b-it }
+    artificialAnalysis: { slug: gemma-4-31b }
+
+  # Sibling MoE variant. Flip enabled to true to add it to the board — this is
+  # the whole "add a new open-source model" workflow.
+  - key: gemma-4-26b-a4b
+    label: Gemma 4 26B A4B
+    creator: Google
+    openWeights: true
+    contextWindow: 131072
+    enabled: false
+    openrouter: { slug: google/gemma-4-26b-a4b-it }
+    artificialAnalysis: { slug: gemma-4-26b-a4b }

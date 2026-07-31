@@ -1,0 +1,7 @@
+{
+  "name": "@leaderboard/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Types and pure logic used by both the harness and the web app."
+}

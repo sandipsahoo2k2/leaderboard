@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+/* Source colours defined once, used everywhere. Telling the two data sources
+   apart at a glance is the whole point of this UI. */
+@theme {
+  --color-measured: oklch(0.72 0.15 195);
+  --color-reference: oklch(0.78 0.16 85);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-neutral-950 text-neutral-200 antialiased;
+  font-feature-settings: 'tnum' 1; /* tabular figures keep number columns aligned */
+}

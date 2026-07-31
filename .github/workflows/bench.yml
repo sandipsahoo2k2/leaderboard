@@ -1,0 +1,71 @@
+name: Benchmark
+
+# Measures the models and commits the result. Pushing data/latest.json to main
+# triggers the Pages workflow, so a successful run redeploys the site.
+#
+# Manual by default: these calls cost money and the AA free tier is 100
+# requests/day. The weekly schedule keeps the board from going stale.
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: Which harness command to run
+        type: choice
+        options: [validate, run]
+        default: validate
+      models:
+        description: 'Comma-separated model keys (blank = all enabled)'
+        type: string
+        default: ''
+      refresh:
+        description: Force a live Artificial Analysis request
+        type: boolean
+        default: false
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bench
+  cancel-in-progress: false
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: harness/package-lock.json
+
+      - name: Install
+        working-directory: harness
+        run: npm ci
+
+      - name: Benchmark
+        working-directory: harness
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ARTIFICIALANALYSIS_API_KEY: ${{ secrets.ARTIFICIALANALYSIS_API_KEY }}
+          AA_DAILY_BUDGET: '3'
+        run: |
+          npm run bench -- "${{ inputs.command || 'run' }}" \
+            ${{ inputs.models && format('--models {0}', inputs.models) || '' }} \
+            ${{ inputs.refresh && '--refresh' || '' }}
+
+      - name: Commit results
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/
+          if git diff --staged --quiet; then
+            echo 'No change in results; nothing to commit.'
+          else
+            git commit -m 'chore(data): refresh leaderboard snapshot'
+            git push
+          fi

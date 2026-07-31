@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+# Builds the Angular app and publishes it. Runs on every push to main, which
+# includes the commits the bench workflow makes when data/latest.json changes.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        working-directory: web
+        run: npm ci
+
+      # Pages serves the site from /<repo>/, so the base href has to match or
+      # every asset 404s. Derived from the repo name, not hardcoded.
+      - name: Build
+        working-directory: web
+        run: npm run build -- --base-href "/${{ github.event.repository.name }}/"
+
+      # The app is a single page with no server. Pages returns 404.html for
+      # unknown paths, so making it a copy of index.html keeps deep links working.
+      - name: Add SPA fallback
+        run: cp web/dist/web/browser/index.html web/dist/web/browser/404.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist/web/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
