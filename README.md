@@ -67,6 +67,13 @@ cd harness && npm install
 
 ## Commands
 
+Refresh the board from Artificial Analysis without re-measuring. Zero
+OpenRouter requests, at most one AA request. This is what runs hourly:
+
+```bash
+cd harness && npm run bench -- refresh-aa
+```
+
 Cheapest end-to-end check — 3 OpenRouter calls, at most 1 AA request:
 
 ```bash
@@ -115,9 +122,25 @@ Two workflows:
 - **`.github/workflows/pages.yml`** — on push to `main`, builds the app with
   `--base-href /<repo-name>/`, copies `index.html` to `404.html` so deep links
   survive, and publishes.
-- **`.github/workflows/bench.yml`** — manual (`workflow_dispatch`, with a
-  command/models/refresh form) plus a Monday cron. Commits `data/latest.json`,
-  which in turn triggers the Pages deploy.
+- **`.github/workflows/bench.yml`** — two schedules plus manual dispatch.
+  Commits `data/latest.json`, which triggers the Pages deploy.
+
+  | Schedule | Command | Cost |
+  | --- | --- | --- |
+  | hourly, on the hour | `refresh-aa` | free — 1 AA request, 0 OpenRouter |
+  | daily 06:40 UTC | `run` | ~$0.027 — 5-trial sweep, 18 OpenRouter calls |
+
+  Hourly measurement was deliberately avoided: at one trial per model the
+  numbers swing by 40% run to run, so the daily job buys stable medians
+  instead. The hourly job carries the previous measured rows over untouched.
+
+### The browser never calls an API
+
+The deployed page is static. A GitHub Action holds the keys, calls the APIs,
+and writes `data/latest.json`; the build bakes that file into `dist/`, and the
+page fetches it as a plain asset. Nothing in the shipped bundle references an
+API host or a key, so there is nothing for a visitor to scrape. The page shows
+when the data was last refreshed, and goes amber past two hours.
 
 One-time setup on GitHub:
 

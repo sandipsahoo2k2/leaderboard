@@ -32,6 +32,28 @@ export class LeaderboardStore {
 
   readonly entries = computed<LeaderboardEntry[]>(() => this.snapshot.value()?.entries ?? []);
   readonly generatedAt = computed(() => this.snapshot.value()?.generatedAt ?? null);
+
+  /**
+   * When the Artificial Analysis numbers themselves were pulled. Distinct from
+   * generatedAt: the hourly job refetches AA while carrying measured rows over,
+   * so the two timestamps drift apart on purpose.
+   */
+  readonly referenceCapturedAt = computed(() => {
+    for (const entry of this.entries()) {
+      const at = entry.bySource['artificial-analysis']?.intelligenceIndex?.capturedAt;
+      if (at) return at;
+    }
+    return null;
+  });
+
+  /** When we last measured anything ourselves. */
+  readonly measuredCapturedAt = computed(() => {
+    for (const entry of this.entries()) {
+      const at = entry.bySource['measured']?.outputTokensPerSecond?.capturedAt;
+      if (at) return at;
+    }
+    return null;
+  });
   readonly isEmpty = computed(() => !this.snapshot.isLoading() && this.entries().length === 0);
 
   /** Entries sorted for the currently active source tab. Nulls always sink. */

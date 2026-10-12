@@ -5,9 +5,9 @@
 
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import type { MetricSource } from '@shared/leaderboard-types';
-import { formatTimestamp } from './core/format';
 import { LeaderboardStore } from './core/leaderboard.store';
 import { CompareTable } from './features/compare-table';
+import { Freshness } from './features/freshness';
 import { ModelTable } from './features/model-table';
 import { RankingCards } from './features/ranking-cards';
 import { ScatterPlot } from './features/scatter-chart';
@@ -16,7 +16,7 @@ import { SourceTabs } from './features/source-tabs';
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SourceTabs, ModelTable, CompareTable, RankingCards, ScatterPlot],
+  imports: [SourceTabs, ModelTable, CompareTable, RankingCards, ScatterPlot, Freshness],
   template: `
     <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <header class="mb-8">
@@ -25,9 +25,9 @@ import { SourceTabs } from './features/source-tabs';
           A small, explicitly configured set of models. Every number carries its source —
           nothing here is blended.
         </p>
-        <p class="mt-2 text-xs text-neutral-500">
-          Snapshot generated {{ generatedAt() }}
-        </p>
+        <div class="mt-3">
+          <app-freshness />
+        </div>
       </header>
 
       <app-source-tabs />
@@ -72,5 +72,4 @@ export class App {
     return tab === 'compare' ? null : tab;
   });
 
-  protected readonly generatedAt = computed(() => formatTimestamp(this.store.generatedAt()));
 }

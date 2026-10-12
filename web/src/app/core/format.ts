@@ -25,3 +25,27 @@ export function formatTimestamp(iso: string | null | undefined): string {
   if (!iso) return 'never';
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 }
+
+/** "12 minutes ago". Uses the browser's locale and the viewer's own clock. */
+export function formatRelative(iso: string | null | undefined): string {
+  if (!iso) return 'never';
+  const seconds = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+
+  const steps: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+    ['second', 60],
+    ['minute', 60],
+    ['hour', 24],
+    ['day', 7],
+    ['week', 4.35],
+    ['month', 12],
+    ['year', Infinity],
+  ];
+
+  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+  let value = seconds;
+  for (const [unit, size] of steps) {
+    if (Math.abs(value) < size) return rtf.format(-Math.round(value), unit);
+    value /= size;
+  }
+  return rtf.format(-Math.round(value), 'year');
+}

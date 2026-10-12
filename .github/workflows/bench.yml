@@ -1,18 +1,23 @@
 name: Benchmark
 
-# Measures the models and commits the result. Pushing data/latest.json to main
-# triggers the Pages workflow, so a successful run redeploys the site.
+# Keeps data/latest.json current. Committing it to main triggers the Pages
+# workflow, so a successful run here redeploys the site with fresh numbers.
 #
-# Manual by default: these calls cost money and the AA free tier is 100
-# requests/day. The weekly schedule keeps the board from going stale.
+# Two schedules, deliberately different in cost:
+#
+#   hourly  refresh-aa  <=1 Artificial Analysis request, 0 OpenRouter requests.
+#                       Free. Refreshes the home tab.
+#   daily   run         Full 5-trial measurement sweep through OpenRouter.
+#                       Paid, a few cents. Gives medians worth trusting, which
+#                       hourly n=1 sampling would not.
 on:
   workflow_dispatch:
     inputs:
       command:
         description: Which harness command to run
         type: choice
-        options: [validate, run]
-        default: validate
+        options: [refresh-aa, validate, run]
+        default: refresh-aa
       models:
         description: 'Comma-separated model keys (blank = all enabled)'
         type: string
@@ -22,11 +27,13 @@ on:
         type: boolean
         default: false
   schedule:
-    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+    - cron: '0 * * * *' # every hour, on the hour — AA only
+    - cron: '40 6 * * *' # daily 06:40 UTC — full measured run
 
 permissions:
   contents: write
 
+# Never let two runs race on the same commit.
 concurrency:
   group: bench
   cancel-in-progress: false
@@ -47,6 +54,19 @@ jobs:
         working-directory: harness
         run: npm ci
 
+      # Which command runs depends on how the workflow was triggered. A manual
+      # dispatch wins; otherwise the cron expression picks.
+      - name: Decide command
+        id: pick
+        run: |
+          if [ -n "${{ inputs.command }}" ]; then
+            echo "command=${{ inputs.command }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = '40 6 * * *' ]; then
+            echo "command=run" >> "$GITHUB_OUTPUT"
+          else
+            echo "command=refresh-aa" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Benchmark
         working-directory: harness
         env:
@@ -55,7 +75,7 @@ jobs:
           AA_HOURLY_BUDGET: '3'
           AA_DAILY_BUDGET: '75'
         run: |
-          npm run bench -- "${{ inputs.command || 'run' }}" \
+          npm run bench -- "${{ steps.pick.outputs.command }}" \
             ${{ inputs.models && format('--models {0}', inputs.models) || '' }} \
             ${{ inputs.refresh && '--refresh' || '' }}
 
@@ -67,6 +87,8 @@ jobs:
           if git diff --staged --quiet; then
             echo 'No change in results; nothing to commit.'
           else
-            git commit -m 'chore(data): refresh leaderboard snapshot'
+            git commit -m "chore(data): refresh via ${{ steps.pick.outputs.command }}"
+            # Another run may have landed while this one was working.
+            git pull --rebase --autostash origin main
             git push
           fi

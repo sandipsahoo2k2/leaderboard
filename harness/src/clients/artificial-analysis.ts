@@ -23,7 +23,12 @@ const BUDGET_PATH = resolve(REPO_ROOT, 'data/cache/aa-budget.json');
 /** Ceilings, not targets. Raise only when you mean to. */
 const DEFAULT_HOURLY_BUDGET = 3;
 const DEFAULT_DAILY_BUDGET = 75;
-const DEFAULT_CACHE_TTL_HOURS = 24;
+/**
+ * One hour, matching the hourly refresh job: a scheduled run finds the cache
+ * just expired and fetches, while anything run more often than that is served
+ * from disk for free. Override with AA_CACHE_TTL_HOURS.
+ */
+const DEFAULT_CACHE_TTL_HOURS = 1;
 
 /** Normalised view of one AA model. Pricing fields are dropped on purpose. */
 export interface AaModel {
@@ -111,7 +116,8 @@ export class ArtificialAnalysisClient {
    * because out-of-date numbers beat no numbers.
    */
   async fetchModels(opts: { force?: boolean; ttlHours?: number } = {}): Promise<FetchResult> {
-    const ttlHours = opts.ttlHours ?? DEFAULT_CACHE_TTL_HOURS;
+    const ttlHours =
+      opts.ttlHours ?? Number(process.env.AA_CACHE_TTL_HOURS ?? DEFAULT_CACHE_TTL_HOURS);
     const cached = readCache();
 
     if (cached && !opts.force && ageHours(cached.fetchedAt) < ttlHours) {

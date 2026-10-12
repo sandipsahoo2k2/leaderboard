@@ -15,6 +15,7 @@ import { ArtificialAnalysisClient } from './clients/artificial-analysis.ts';
 import { loadConfig } from './config.ts';
 import { buildBoard } from './commands/build-board.ts';
 import { probe } from './commands/probe.ts';
+import { refreshAa } from './commands/refresh-aa.ts';
 import { syncAa } from './commands/sync-aa.ts';
 
 const USAGE = `
@@ -23,6 +24,8 @@ bench <command> [options]
 Commands
   probe       One streamed call per model. Validates slugs, auth, timing maths.
   sync-aa     Pull published scores from Artificial Analysis (cached).
+  refresh-aa  Rebuild the board from fresh AA data WITHOUT re-measuring.
+              <=1 AA request, 0 OpenRouter requests. This is the hourly job.
   validate    probe + sync-aa + measured-vs-reference delta. Writes latest.json.
   run         Same as validate but with the full trial count from config.
 
@@ -69,6 +72,10 @@ async function main(): Promise<void> {
 
     case 'sync-aa':
       await syncAa({ models, refresh: values.refresh });
+      break;
+
+    case 'refresh-aa':
+      await refreshAa({ models, refresh: values.refresh });
       break;
 
     case 'validate':
