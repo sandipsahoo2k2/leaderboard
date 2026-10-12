@@ -79,16 +79,44 @@ jobs:
             ${{ inputs.models && format('--models {0}', inputs.models) || '' }} \
             ${{ inputs.refresh && '--refresh' || '' }}
 
+      # data/ is generated output, not authored work: the newest run is always
+      # the one we want. So instead of merging or rebasing — which would
+      # conflict on data/latest.json, a file every run rewrites — we replay our
+      # fresh output on top of whatever main currently points at.
+      #
+      # The loop covers the gap between fetching and pushing, where another
+      # run or a human push can land first.
       - name: Commit results
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/
-          if git diff --staged --quiet; then
-            echo 'No change in results; nothing to commit.'
-          else
+
+          staging="$(mktemp -d)"
+          cp -R data/. "$staging/"
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            rm -rf data
+            mkdir -p data
+            cp -R "$staging/." data/
+
+            git add data/
+            if git diff --staged --quiet; then
+              echo 'No change in results; nothing to commit.'
+              exit 0
+            fi
+
             git commit -m "chore(data): refresh via ${{ steps.pick.outputs.command }}"
-            # Another run may have landed while this one was working.
-            git pull --rebase --autostash origin main
-            git push
-          fi
+            if git push; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+
+            echo "Push rejected on attempt $attempt; main moved. Retrying."
+            sleep $(( attempt * 5 ))
+          done
+
+          echo 'Could not push after 3 attempts.' >&2
+          exit 1
