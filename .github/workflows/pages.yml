@@ -5,6 +5,13 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # A push made with GITHUB_TOKEN does not trigger other workflows — GitHub
+  # blocks that to prevent recursion. The Benchmark job's hourly data commits
+  # would therefore never redeploy the site, so we listen for the job itself
+  # finishing instead of for the commit it makes.
+  workflow_run:
+    workflows: [Benchmark]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -20,8 +27,16 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Don't publish off the back of a failed benchmark.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
+      # workflow_run checks out the default branch tip, which is what we want:
+      # the commit the benchmark just pushed.
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-node@v4
         with:
