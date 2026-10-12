@@ -35,7 +35,8 @@ Options
 Environment
   OPENROUTER_API_KEY           required for probe / validate / run
   ARTIFICIALANALYSIS_API_KEY   optional; without it the AA tab stays empty
-  AA_DAILY_BUDGET              max AA requests per day (default 3)
+  AA_HOURLY_BUDGET             max AA requests per hour (default 3)
+  AA_DAILY_BUDGET              max AA requests per day  (default 75, tier is 100)
 `.trim();
 
 async function main(): Promise<void> {
@@ -93,8 +94,10 @@ async function main(): Promise<void> {
       return;
   }
 
-  const used = ArtificialAnalysisClient.requestsUsedToday();
-  if (used > 0) console.log(`\n  AA requests used today: ${used}`);
+  const used = ArtificialAnalysisClient.requestsUsed();
+  if (used.day > 0) {
+    console.log(`\n  AA requests used: ${used.hour} this hour, ${used.day} today`);
+  }
 }
 
 main().catch((err: unknown) => {

@@ -7,7 +7,7 @@ import { Injectable, computed, resource, signal } from '@angular/core';
 import type { LeaderboardEntry, LeaderboardSnapshot, MetricSource, SourcedRow } from '@shared/leaderboard-types';
 import { compareEntry, metricValue } from '@shared/compare';
 import type { MetricKey } from './columns';
-import type { TabId } from './sources';
+import { DEFAULT_TAB, type TabId } from './sources';
 
 export interface SortState {
   key: MetricKey | 'label';
@@ -27,7 +27,7 @@ export class LeaderboardStore {
     },
   });
 
-  readonly activeTab = signal<TabId>('measured');
+  readonly activeTab = signal<TabId>(DEFAULT_TAB);
   readonly sort = signal<SortState>({ key: 'intelligenceIndex', direction: 'desc' });
 
   readonly entries = computed<LeaderboardEntry[]>(() => this.snapshot.value()?.entries ?? []);

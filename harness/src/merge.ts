@@ -36,8 +36,17 @@ const EMPTY_SCORES = {
   gpqa: null,
   math500: null,
   aime: null,
+  aime25: null,
   livecodebench: null,
   hle: null,
+  scicode: null,
+  ifbench: null,
+  lcr: null,
+  tau2: null,
+  tauBanking: null,
+  terminalbenchHard: null,
+  terminalbenchV21: null,
+  terminalbenchV40: null,
 } as const;
 
 /** A row built from our own OpenRouter runs. Perf only until scorers land. */
@@ -54,6 +63,7 @@ export function measuredRow(
     ...EMPTY_SCORES,
     outputTokensPerSecond: mk(perf.medianOutputTokensPerSecond, 'measured', capturedAt, n),
     timeToFirstTokenSeconds: mk(perf.medianTtftSeconds, 'measured', capturedAt, n),
+    timeToFirstAnswerTokenSeconds: null, // we do not separate thinking from answering
     totalResponseSeconds: mk(perf.medianTotalResponseSeconds, 'measured', capturedAt, n),
   };
 }
@@ -76,11 +86,21 @@ export function artificialAnalysisRow(
     gpqa: mk(aa.gpqa, s, capturedAt),
     math500: mk(aa.math500, s, capturedAt),
     aime: mk(aa.aime, s, capturedAt),
+    aime25: mk(aa.aime25, s, capturedAt),
     livecodebench: mk(aa.livecodebench, s, capturedAt),
     hle: mk(aa.hle, s, capturedAt),
+    scicode: mk(aa.scicode, s, capturedAt),
+    ifbench: mk(aa.ifbench, s, capturedAt),
+    lcr: mk(aa.lcr, s, capturedAt),
+    tau2: mk(aa.tau2, s, capturedAt),
+    tauBanking: mk(aa.tauBanking, s, capturedAt),
+    terminalbenchHard: mk(aa.terminalbenchHard, s, capturedAt),
+    terminalbenchV21: mk(aa.terminalbenchV21, s, capturedAt),
+    terminalbenchV40: mk(aa.terminalbenchV40, s, capturedAt),
     outputTokensPerSecond: mk(aa.outputTokensPerSecond, s, capturedAt),
     timeToFirstTokenSeconds: mk(aa.timeToFirstTokenSeconds, s, capturedAt),
-    totalResponseSeconds: null, // AA does not publish this
+    timeToFirstAnswerTokenSeconds: mk(aa.timeToFirstAnswerTokenSeconds, s, capturedAt),
+    totalResponseSeconds: null, // AA publishes no end-to-end figure; not derived
   };
 }
 

@@ -90,13 +90,25 @@ export interface ScoreFields {
   gpqa: Metric | null;
   math500: Metric | null;
   aime: Metric | null;
+  aime25: Metric | null;
   livecodebench: Metric | null;
   hle: Metric | null;
+  scicode: Metric | null;
+  ifbench: Metric | null;
+  lcr: Metric | null;
+  tau2: Metric | null;
+  tauBanking: Metric | null;
+  terminalbenchHard: Metric | null;
+  terminalbenchV21: Metric | null;
+  terminalbenchV40: Metric | null;
 }
 
 export interface PerfFields {
   outputTokensPerSecond: Metric | null;
   timeToFirstTokenSeconds: Metric | null;
+  /** Reasoning models spend time thinking before answering; AA reports this. */
+  timeToFirstAnswerTokenSeconds: Metric | null;
+  /** Measured only — AA does not publish an end-to-end figure. */
   totalResponseSeconds: Metric | null;
 }
 

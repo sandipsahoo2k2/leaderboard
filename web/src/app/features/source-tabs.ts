@@ -12,25 +12,39 @@ import { COMPARE_TAB, SOURCES, type TabId } from '../core/sources';
   selector: 'app-source-tabs',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-wrap items-center gap-1 border-b border-neutral-800">
-      @for (tab of tabs; track tab.id) {
-        <button
-          type="button"
-          (click)="store.setTab(tab.id)"
-          [class]="buttonClass(tab.id)"
-          class="relative -mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors"
-        >
-          @if (tab.dotClass) {
-            <span class="h-2 w-2 rounded-full" [class]="tab.dotClass"></span>
-          }
-          {{ tab.label }}
-          @if (tab.id === 'compare' && store.divergedCount() > 0) {
-            <span class="rounded-full bg-red-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-red-400">
-              {{ store.divergedCount() }}
-            </span>
-          }
-        </button>
-      }
+    <div class="flex flex-wrap items-center border-b border-neutral-800">
+      <!-- The home tab sits on its own; the rest are secondary views, pushed
+           right and styled down so the page reads as one board, not three. -->
+      <button
+        type="button"
+        (click)="store.setTab(home.id)"
+        [class]="buttonClass(home.id)"
+        class="relative -mb-px flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors"
+      >
+        <span class="h-2 w-2 rounded-full" [class]="home.dotClass"></span>
+        {{ home.label }}
+      </button>
+
+      <div class="ml-auto flex items-center gap-1">
+        @for (tab of secondary; track tab.id) {
+          <button
+            type="button"
+            (click)="store.setTab(tab.id)"
+            [class]="buttonClass(tab.id)"
+            class="relative -mb-px flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-xs transition-colors"
+          >
+            @if (tab.dotClass) {
+              <span class="h-1.5 w-1.5 rounded-full" [class]="tab.dotClass"></span>
+            }
+            {{ tab.label }}
+            @if (tab.id === 'compare' && store.divergedCount() > 0) {
+              <span class="rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-red-400">
+                {{ store.divergedCount() }}
+              </span>
+            }
+          </button>
+        }
+      </div>
     </div>
 
     <p class="mt-3 text-sm text-neutral-400">{{ activeBlurb() }}</p>
@@ -39,10 +53,13 @@ import { COMPARE_TAB, SOURCES, type TabId } from '../core/sources';
 export class SourceTabs {
   protected readonly store = inject(LeaderboardStore);
 
-  protected readonly tabs = [
+  private readonly tabs = [
     ...SOURCES.map((s) => ({ id: s.id as TabId, label: s.label, blurb: s.blurb, dotClass: s.dotClass })),
     { id: COMPARE_TAB.id as TabId, label: COMPARE_TAB.label, blurb: COMPARE_TAB.blurb, dotClass: '' },
   ];
+
+  protected readonly home = this.tabs[0]!;
+  protected readonly secondary = this.tabs.slice(1);
 
   protected readonly activeBlurb = computed(
     () => this.tabs.find((t) => t.id === this.store.activeTab())?.blurb ?? '',

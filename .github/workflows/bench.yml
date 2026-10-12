@@ -52,7 +52,8 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ARTIFICIALANALYSIS_API_KEY: ${{ secrets.ARTIFICIALANALYSIS_API_KEY }}
-          AA_DAILY_BUDGET: '3'
+          AA_HOURLY_BUDGET: '3'
+          AA_DAILY_BUDGET: '75'
         run: |
           npm run bench -- "${{ inputs.command || 'run' }}" \
             ${{ inputs.models && format('--models {0}', inputs.models) || '' }} \

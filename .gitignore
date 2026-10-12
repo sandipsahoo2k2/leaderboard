@@ -3,3 +3,7 @@ node_modules/
 dist/
 .angular/
 *.log
+
+# Local/CI scratch: AA raw payload (844K) and the request counter.
+# Re-fetched on demand; committing it would churn history every refresh.
+data/cache/

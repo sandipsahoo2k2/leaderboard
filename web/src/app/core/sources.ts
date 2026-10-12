@@ -18,14 +18,12 @@ export interface SourceMeta {
   dotClass: string;
 }
 
+/**
+ * Order matters: the first entry is the home tab the page opens on. Artificial
+ * Analysis leads because their published scores are the point of the board;
+ * our own measurements are the secondary view behind it.
+ */
 export const SOURCES: readonly SourceMeta[] = [
-  {
-    id: 'measured',
-    label: 'Measured',
-    blurb: 'Measured by this project: streamed OpenRouter requests, median of N trials.',
-    badgeClass: 'bg-measured/10 text-measured ring-1 ring-measured/30',
-    dotClass: 'bg-measured',
-  },
   {
     id: 'artificial-analysis',
     label: 'Artificial Analysis',
@@ -33,7 +31,17 @@ export const SOURCES: readonly SourceMeta[] = [
     badgeClass: 'bg-reference/10 text-reference ring-1 ring-reference/30',
     dotClass: 'bg-reference',
   },
+  {
+    id: 'measured',
+    label: 'Measured',
+    blurb: 'Measured by this project: streamed OpenRouter requests, median of N trials.',
+    badgeClass: 'bg-measured/10 text-measured ring-1 ring-measured/30',
+    dotClass: 'bg-measured',
+  },
 ] as const;
+
+/** The tab the page opens on. */
+export const DEFAULT_TAB: MetricSource = SOURCES[0]!.id;
 
 export const COMPARE_TAB = {
   id: 'compare' as const,

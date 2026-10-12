@@ -2,9 +2,14 @@
  * Artificial Analysis = the thing we VALIDATE against. Their published scores
  * are the reference; our OpenRouter runs are the measurement.
  *
- * The free tier is 100 requests/day, so this client is built to almost never
- * call out: every response is cached to disk, and a daily budget counter makes
- * overspending impossible rather than merely unlikely.
+ * The free tier allows 100 requests/day, so this client is built to almost
+ * never call out: every response is cached to disk, and two rolling counters
+ * make overspending impossible rather than merely unlikely.
+ *
+ * The ceilings are 3/hour and 75/day. The hourly cap is the one that actually
+ * binds — 3 x 24 = 72, so it keeps us under the daily figure on its own, and
+ * stops a stuck loop from burning the whole allowance in one minute. The daily
+ * cap is the backstop, set below 100 to leave headroom for manual poking.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -15,8 +20,9 @@ const ENDPOINT = 'https://artificialanalysis.ai/api/v2/data/llms/models';
 const CACHE_PATH = resolve(REPO_ROOT, 'data/cache/aa-models.json');
 const BUDGET_PATH = resolve(REPO_ROOT, 'data/cache/aa-budget.json');
 
-/** Deliberately tiny. Raise only when you mean to. */
-const DEFAULT_DAILY_BUDGET = 3;
+/** Ceilings, not targets. Raise only when you mean to. */
+const DEFAULT_HOURLY_BUDGET = 3;
+const DEFAULT_DAILY_BUDGET = 75;
 const DEFAULT_CACHE_TTL_HOURS = 24;
 
 /** Normalised view of one AA model. Pricing fields are dropped on purpose. */
@@ -31,20 +37,43 @@ export interface AaModel {
   gpqa: number | null;
   math500: number | null;
   aime: number | null;
+  aime25: number | null;
   livecodebench: number | null;
   hle: number | null;
+  scicode: number | null;
+  ifbench: number | null;
+  lcr: number | null;
+  tau2: number | null;
+  tauBanking: number | null;
+  terminalbenchHard: number | null;
+  terminalbenchV21: number | null;
+  terminalbenchV40: number | null;
   outputTokensPerSecond: number | null;
   timeToFirstTokenSeconds: number | null;
+  timeToFirstAnswerTokenSeconds: number | null;
 }
 
+/**
+ * The cache holds AA's RAW response, not our mapped view of it. Mapping happens
+ * on read, so correcting a field mapping costs zero API requests — which
+ * matters when the daily allowance is small.
+ */
 interface CacheFile {
   fetchedAt: string;
-  models: AaModel[];
+  raw: unknown[];
 }
 
+/**
+ * Two rolling windows. Each resets when its key changes, so no cleanup job is
+ * needed — a new hour simply has a different `hour` string.
+ */
 interface BudgetFile {
-  date: string;
-  count: number;
+  /** YYYY-MM-DD */
+  day: string;
+  dayCount: number;
+  /** YYYY-MM-DDTHH */
+  hour: string;
+  hourCount: number;
 }
 
 export interface FetchResult {
@@ -54,13 +83,21 @@ export interface FetchResult {
   fromCache: boolean;
 }
 
+export interface BudgetLimits {
+  hourly?: number;
+  daily?: number;
+}
+
 export class ArtificialAnalysisClient {
   readonly #apiKey: string | undefined;
+  readonly #hourlyBudget: number;
   readonly #dailyBudget: number;
 
-  constructor(apiKey: string | undefined, dailyBudget?: number) {
+  constructor(apiKey: string | undefined, limits: BudgetLimits = {}) {
     this.#apiKey = apiKey;
-    this.#dailyBudget = dailyBudget ?? Number(process.env.AA_DAILY_BUDGET ?? DEFAULT_DAILY_BUDGET);
+    this.#hourlyBudget =
+      limits.hourly ?? Number(process.env.AA_HOURLY_BUDGET ?? DEFAULT_HOURLY_BUDGET);
+    this.#dailyBudget = limits.daily ?? Number(process.env.AA_DAILY_BUDGET ?? DEFAULT_DAILY_BUDGET);
   }
 
   get configured(): boolean {
@@ -69,37 +106,48 @@ export class ArtificialAnalysisClient {
 
   /**
    * Returns every LLM AA knows about. Hits the network only when the cache is
-   * missing, stale, or `force` is set — and never when that would exceed the
-   * daily budget.
+   * missing, stale, or `force` is set — and never when that would breach the
+   * hourly or daily ceiling. A breach serves stale cache rather than failing,
+   * because out-of-date numbers beat no numbers.
    */
   async fetchModels(opts: { force?: boolean; ttlHours?: number } = {}): Promise<FetchResult> {
     const ttlHours = opts.ttlHours ?? DEFAULT_CACHE_TTL_HOURS;
     const cached = readCache();
 
     if (cached && !opts.force && ageHours(cached.fetchedAt) < ttlHours) {
-      return { models: cached.models, fetchedAt: cached.fetchedAt, fromCache: true };
+      return { models: cached.raw.map(toAaModel), fetchedAt: cached.fetchedAt, fromCache: true };
     }
     if (!this.#apiKey) {
-      if (cached) return { models: cached.models, fetchedAt: cached.fetchedAt, fromCache: true };
+      if (cached) return { models: cached.raw.map(toAaModel), fetchedAt: cached.fetchedAt, fromCache: true };
       throw new Error('ARTIFICIALANALYSIS_API_KEY is not set and no cache exists');
     }
 
     const budget = readBudget();
-    if (budget.count >= this.#dailyBudget) {
+    const breach =
+      budget.hourCount >= this.#hourlyBudget
+        ? `hourly ceiling reached (${budget.hourCount}/${this.#hourlyBudget} this hour)`
+        : budget.dayCount >= this.#dailyBudget
+          ? `daily ceiling reached (${budget.dayCount}/${this.#dailyBudget} today)`
+          : null;
+
+    if (breach) {
       if (cached) {
-        console.warn(
-          `! AA daily budget spent (${budget.count}/${this.#dailyBudget}); serving stale cache from ${cached.fetchedAt}`,
-        );
-        return { models: cached.models, fetchedAt: cached.fetchedAt, fromCache: true };
+        console.warn(`! AA ${breach}; serving cache from ${cached.fetchedAt}`);
+        return { models: cached.raw.map(toAaModel), fetchedAt: cached.fetchedAt, fromCache: true };
       }
       throw new Error(
-        `AA daily budget spent (${budget.count}/${this.#dailyBudget}) and no cache to fall back on. ` +
-          `Raise AA_DAILY_BUDGET only if you mean to.`,
+        `AA ${breach} and no cache to fall back on. ` +
+          `Wait for the window to roll over, or raise AA_HOURLY_BUDGET / AA_DAILY_BUDGET if you mean to.`,
       );
     }
 
     const res = await fetch(ENDPOINT, { headers: { 'x-api-key': this.#apiKey } });
-    writeBudget({ date: budget.date, count: budget.count + 1 });
+    writeBudget({
+      day: budget.day,
+      dayCount: budget.dayCount + 1,
+      hour: budget.hour,
+      hourCount: budget.hourCount + 1,
+    });
 
     if (!res.ok) {
       const body = await res.text().catch(() => '');
@@ -107,19 +155,22 @@ export class ArtificialAnalysisClient {
     }
 
     const payload = (await res.json()) as { data?: unknown[] };
-    const models = (payload.data ?? []).map(toAaModel);
+    const raw = payload.data ?? [];
+    const models = raw.map(toAaModel);
     const fetchedAt = new Date().toISOString();
-    writeCache({ fetchedAt, models });
+    writeCache({ fetchedAt, raw });
 
     console.log(
-      `  AA request ${budget.count + 1}/${this.#dailyBudget} today — ${models.length} models cached`,
+      `  AA request ${budget.hourCount + 1}/${this.#hourlyBudget} this hour, ` +
+        `${budget.dayCount + 1}/${this.#dailyBudget} today — ${models.length} models cached`,
     );
     return { models, fetchedAt, fromCache: false };
   }
 
-  /** How many requests we have already spent today. */
-  static requestsUsedToday(): number {
-    return readBudget().count;
+  /** What we have spent in each window so far. */
+  static requestsUsed(): { hour: number; day: number } {
+    const b = readBudget();
+    return { hour: b.hourCount, day: b.dayCount };
   }
 }
 
@@ -154,15 +205,35 @@ function toAaModel(raw: unknown): AaModel {
     gpqa: pct('gpqa'),
     math500: pct('math_500'),
     aime: pct('aime'),
+    aime25: pct('aime_25'),
     livecodebench: pct('livecodebench'),
     hle: pct('hle'),
-    outputTokensPerSecond: num(r['median_output_tokens_per_second']),
-    timeToFirstTokenSeconds: num(r['median_time_to_first_token_seconds']),
+    scicode: pct('scicode'),
+    ifbench: pct('ifbench'),
+    lcr: pct('lcr'),
+    tau2: pct('tau2'),
+    tauBanking: pct('tau_banking'),
+    terminalbenchHard: pct('terminalbench_hard'),
+    terminalbenchV21: pct('terminalbench_v2_1'),
+    terminalbenchV40: pct('terminalbench_v4_0'),
+    outputTokensPerSecond: positive(r['median_output_tokens_per_second']),
+    timeToFirstTokenSeconds: positive(r['median_time_to_first_token_seconds']),
+    timeToFirstAnswerTokenSeconds: positive(r['median_time_to_first_answer_token']),
   };
 }
 
 function num(v: unknown): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+/**
+ * AA encodes "no perf data for this model" as a literal 0 — true for roughly
+ * three quarters of their catalogue. Taken at face value a model with no data
+ * wins every speed ranking, so zero and below become null.
+ */
+function positive(v: unknown): number | null {
+  const n = num(v);
+  return n !== null && n > 0 ? n : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -172,7 +243,11 @@ function num(v: unknown): number | null {
 function readCache(): CacheFile | null {
   if (!existsSync(CACHE_PATH)) return null;
   try {
-    return JSON.parse(readFileSync(CACHE_PATH, 'utf8')) as CacheFile;
+    const parsed = JSON.parse(readFileSync(CACHE_PATH, 'utf8')) as Partial<CacheFile>;
+    // A cache written before this file stored raw payloads has no `raw` array.
+    // Treat it as absent rather than crashing on it.
+    if (!Array.isArray(parsed.raw) || typeof parsed.fetchedAt !== 'string') return null;
+    return { fetchedAt: parsed.fetchedAt, raw: parsed.raw };
   } catch {
     return null;
   }
@@ -183,15 +258,24 @@ function writeCache(file: CacheFile): void {
   writeFileSync(CACHE_PATH, JSON.stringify(file, null, 2));
 }
 
-/** Budget resets when the calendar day changes. */
+/** Each counter resets when its own window key changes. UTC throughout. */
 function readBudget(): BudgetFile {
-  const today = new Date().toISOString().slice(0, 10);
-  if (!existsSync(BUDGET_PATH)) return { date: today, count: 0 };
+  const now = new Date().toISOString();
+  const day = now.slice(0, 10); // YYYY-MM-DD
+  const hour = now.slice(0, 13); // YYYY-MM-DDTHH
+  const fresh: BudgetFile = { day, dayCount: 0, hour, hourCount: 0 };
+
+  if (!existsSync(BUDGET_PATH)) return fresh;
   try {
-    const parsed = JSON.parse(readFileSync(BUDGET_PATH, 'utf8')) as BudgetFile;
-    return parsed.date === today ? parsed : { date: today, count: 0 };
+    const p = JSON.parse(readFileSync(BUDGET_PATH, 'utf8')) as Partial<BudgetFile>;
+    return {
+      day,
+      dayCount: p.day === day ? (p.dayCount ?? 0) : 0,
+      hour,
+      hourCount: p.hour === hour ? (p.hourCount ?? 0) : 0,
+    };
   } catch {
-    return { date: today, count: 0 };
+    return fresh;
   }
 }
 
