@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T08:48:34.949Z",
+  "generatedAt": "2026-10-13T14:34:18.199Z",
   "entries": [
     {
       "modelKey": "gpt-4.1",
@@ -31,22 +31,22 @@
           "terminalbenchV21": null,
           "terminalbenchV40": null,
           "outputTokensPerSecond": {
-            "value": 137.12895276242256,
+            "value": 115.99040079828941,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           },
           "timeToFirstTokenSeconds": {
-            "value": 0.9031145460000007,
+            "value": 0.6118236440000001,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           },
           "timeToFirstAnswerTokenSeconds": null,
           "totalResponseSeconds": {
-            "value": 2.8064325160000005,
+            "value": 3.183373121,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           }
         },
@@ -57,70 +57,70 @@
           "intelligenceIndex": {
             "value": 12.7,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "codingIndex": null,
           "mathIndex": {
             "value": 34.7,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "mmluPro": {
             "value": 80.60000000000001,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "gpqa": {
             "value": 66.60000000000001,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "math500": {
             "value": 91.2666666666667,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "aime": {
             "value": 43.6666666666667,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "aime25": {
             "value": 34.6666666666667,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "livecodebench": {
             "value": 45.7,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "hle": {
             "value": 4.2,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "scicode": null,
           "ifbench": {
             "value": 42.9931972789116,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "lcr": {
             "value": 68.3333333333333,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "tau2": {
             "value": 47.076023391812896,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "tauBanking": null,
           "terminalbenchHard": {
             "value": 13.6363636363636,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchV21": null,
           "terminalbenchV40": null,
@@ -161,22 +161,22 @@
           "terminalbenchV21": null,
           "terminalbenchV40": null,
           "outputTokensPerSecond": {
-            "value": 30.299379088550985,
+            "value": 88.752127088099,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           },
           "timeToFirstTokenSeconds": {
-            "value": 3.023629535999997,
+            "value": 1.8034494140000024,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           },
           "timeToFirstAnswerTokenSeconds": null,
           "totalResponseSeconds": {
-            "value": 16.26635744800001,
+            "value": 5.92729423900001,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           }
         },
@@ -187,99 +187,99 @@
           "intelligenceIndex": {
             "value": 11.6,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "codingIndex": {
             "value": 30.4,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "mathIndex": {
             "value": 93.4,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "mmluPro": {
             "value": 80.80000000000001,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "gpqa": {
             "value": 78.2,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "math500": null,
           "aime": null,
           "aime25": {
             "value": 93.4416666666667,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "livecodebench": {
             "value": 87.8,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "hle": {
             "value": 19.6,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "scicode": {
             "value": 34,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "ifbench": {
             "value": 68.9795918367347,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "lcr": {
             "value": 52,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "tau2": {
             "value": 65.78947368421049,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "tauBanking": {
             "value": 12.7835051546392,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchHard": {
             "value": 23.4848484848485,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchV21": {
             "value": 26.217228464419502,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchV40": {
             "value": 0,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "outputTokensPerSecond": {
-            "value": 226.925,
+            "value": 228.553,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "timeToFirstTokenSeconds": {
-            "value": 0.508,
+            "value": 0.505,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "timeToFirstAnswerTokenSeconds": {
-            "value": 9.321,
+            "value": 9.256,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "totalResponseSeconds": null
         }
@@ -315,22 +315,22 @@
           "terminalbenchV21": null,
           "terminalbenchV40": null,
           "outputTokensPerSecond": {
-            "value": 24.665152369867116,
+            "value": 30.345299950107332,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           },
           "timeToFirstTokenSeconds": {
-            "value": 0.40989252300000223,
+            "value": 0.4127611459999898,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           },
           "timeToFirstAnswerTokenSeconds": null,
           "totalResponseSeconds": {
-            "value": 10.173855878000001,
+            "value": 8.162361592999995,
             "source": "measured",
-            "capturedAt": "2026-10-12T16:03:54.711Z",
+            "capturedAt": "2026-10-13T14:34:18.199Z",
             "sampleSize": 5
           }
         },
@@ -341,19 +341,19 @@
           "intelligenceIndex": {
             "value": 14.7,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "codingIndex": {
             "value": 43.4,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "mathIndex": null,
           "mmluPro": null,
           "gpqa": {
             "value": 85.7,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "math500": null,
           "aime": null,
@@ -362,62 +362,62 @@
           "hle": {
             "value": 23.599999999999998,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "scicode": {
             "value": 45.5,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "ifbench": {
             "value": 75.57823129251699,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "lcr": {
             "value": 69.6666666666667,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "tau2": {
             "value": 59.9415204678363,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "tauBanking": {
             "value": 14.8453608247423,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchHard": {
             "value": 36.363636363636395,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchV21": {
             "value": 43.4456928838951,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "terminalbenchV40": {
             "value": 0,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "outputTokensPerSecond": {
-            "value": 35.194,
+            "value": 35.533,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "timeToFirstTokenSeconds": {
-            "value": 0.99,
+            "value": 0.984,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "timeToFirstAnswerTokenSeconds": {
-            "value": 50.317,
+            "value": 49.84,
             "source": "artificial-analysis",
-            "capturedAt": "2026-10-13T08:48:34.944Z"
+            "capturedAt": "2026-10-13T14:34:18.190Z"
           },
           "totalResponseSeconds": null
         }
