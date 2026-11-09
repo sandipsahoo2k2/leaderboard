@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-11-09T16:48:54.169Z",
+  "entries": [
+    {
+      "modelKey": "gpt-4.1",
+      "label": "GPT-4.1",
+      "creator": "OpenAI",
+      "openWeights": false,
+      "contextWindow": 1047576,
+      "bySource": {}
+    },
+    {
+      "modelKey": "gpt-oss-120b",
+      "label": "gpt-oss 120B",
+      "creator": "OpenAI",
+      "openWeights": true,
+      "contextWindow": 131072,
+      "bySource": {}
+    },
+    {
+      "modelKey": "gemma-4-31b",
+      "label": "Gemma 4 31B",
+      "creator": "Google",
+      "openWeights": true,
+      "contextWindow": 131072,
+      "bySource": {}
+    }
+  ]
+}
